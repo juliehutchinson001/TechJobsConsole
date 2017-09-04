@@ -2,6 +2,8 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System;
+using System.Linq;
 
 namespace TechJobsConsole
 {
@@ -13,7 +15,41 @@ namespace TechJobsConsole
         public static List<Dictionary<string, string>> FindAll()
         {
             LoadData();
-            return AllJobs;
+            List<Dictionary<string, string>> CopyList = new List<Dictionary<string, string>>(AllJobs);
+            CopyList = CopyList.OrderBy(q => q.ContainsKey("name") ? q["name"] : string.Empty).ToList();
+            return CopyList;
+            //return AllJobs;
+        }
+
+        public static List<Dictionary<string, string>> FindByValue(string value)
+        {
+
+            LoadData();
+            List<Dictionary<string, string>> allColumns = new List<Dictionary<string, string>>();
+            foreach (Dictionary<string, string> listItem in AllJobs)
+            {
+
+                foreach (KeyValuePair<string, string> item in listItem)
+
+                {
+                    foreach (string i in item.Value.Split())
+                    {
+                        if (i.ToLower() == value.ToLower())
+                        {
+                            if (allColumns.Contains(listItem))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                allColumns.Add(listItem);
+                            }
+
+                        }
+                    }
+                }
+            }
+            return allColumns.OrderBy(q => q.ContainsKey("name") ? q["name"] : string.Empty).ToList();
         }
 
         /*
@@ -25,17 +61,16 @@ namespace TechJobsConsole
             LoadData();
 
             List<string> values = new List<string>();
-
             foreach (Dictionary<string, string> job in AllJobs)
             {
                 string aValue = job[column];
-
+     
                 if (!values.Contains(aValue))
                 {
                     values.Add(aValue);
                 }
             }
-            return values;
+            return values.OrderBy(q => q).ToList();
         }
 
         public static List<Dictionary<string, string>> FindByColumnAndValue(string column, string value)
@@ -44,18 +79,17 @@ namespace TechJobsConsole
             LoadData();
 
             List<Dictionary<string, string>> jobs = new List<Dictionary<string, string>>();
-
             foreach (Dictionary<string, string> row in AllJobs)
             {
-                string aValue = row[column];
+                string aValue = row[column].ToLower();
 
-                if (aValue.Contains(value))
+                if (aValue.Contains(value.ToLower()))
                 {
                     jobs.Add(row);
                 }
             }
 
-            return jobs;
+            return jobs.OrderBy(q => q.ContainsKey("name") ? q["name"] : string.Empty).ToList();
         }
 
         /*
@@ -131,7 +165,6 @@ namespace TechJobsConsole
                     }
                 }
             }
-
             // Add the final value
             rowValues.Add(valueBuilder.ToString());
             valueBuilder.Clear();
